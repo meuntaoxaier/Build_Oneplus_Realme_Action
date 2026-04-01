@@ -127,12 +127,23 @@ jobs:
             sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' "$f"
           done
           echo "正在创建缺失的 oplus Kconfig 桩文件..."
-          mkdir -p common/kernel/oplus_cpu/sched
-          touch common/kernel/oplus_cpu/sched/Kconfig
-          mkdir -p common/drivers/soc/oplus/oplus_resctrl
-          touch common/drivers/soc/oplus/oplus_resctrl/Kconfig
-          mkdir -p common/drivers/soc/oplus/storage
-          touch common/drivers/soc/oplus/storage/Kconfig
+          for stub_dir in \
+            common/kernel/oplus_cpu/sched \
+            common/drivers/soc/oplus/oplus_resctrl \
+            common/drivers/soc/oplus/storage; do
+            # Walk each component; if a regular file blocks the path, remove it
+            partial=""
+            IFS='/' read -ra parts <<< "$stub_dir"
+            for p in "${parts[@]}"; do
+              partial="${partial:+$partial/}$p"
+              if [ -e "$partial" ] && [ ! -d "$partial" ]; then
+                echo "  移除冲突文件: $partial"
+                rm -f "$partial"
+              fi
+            done
+            mkdir -p "$stub_dir"
+            touch "$stub_dir/Kconfig"
+          done
 
       - name: 🛠 Set ccache DIR(配置ccache目录)
         run: |
