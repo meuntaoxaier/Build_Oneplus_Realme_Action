@@ -126,6 +126,13 @@ jobs:
             sed -i 's/ -dirty//g' "$f"
             sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' "$f"
           done
+          echo "正在创建缺失的 oplus Kconfig 桩文件..."
+          mkdir -p common/kernel/oplus_cpu/sched
+          touch common/kernel/oplus_cpu/sched/Kconfig
+          mkdir -p common/drivers/soc/oplus/oplus_resctrl
+          touch common/drivers/soc/oplus/oplus_resctrl/Kconfig
+          mkdir -p common/drivers/soc/oplus/storage
+          touch common/drivers/soc/oplus/storage/Kconfig
 
       - name: 🛠 Set ccache DIR(配置ccache目录)
         run: |
