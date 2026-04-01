@@ -144,6 +144,19 @@ jobs:
           touch common/drivers/soc/oplus/oplus_resctrl/Kconfig
           mkdir -p common/drivers/soc/oplus/storage
           touch common/drivers/soc/oplus/storage/Kconfig
+          echo "正在创建缺失的 oplus locking 桩文件..."
+          # kernel/locking/ contains dangling vendor symlinks that must be
+          # replaced with empty stubs so the build can find them.
+          for stub in \
+            common/kernel/locking/locking_main.h \
+            common/kernel/locking/oplus_locking.c \
+            common/kernel/locking/sa_common_struct.h; do
+            if [ -L "$stub" ] || [ -e "$stub" ]; then
+              rm -f "$stub"
+            fi
+            touch "$stub"
+            echo "  已创建桩文件: $stub"
+          done
 
       - name: 🛠 Set ccache DIR(配置ccache目录)
         run: |
