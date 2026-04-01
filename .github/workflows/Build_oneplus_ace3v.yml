@@ -133,7 +133,7 @@ jobs:
             common/kernel/oplus_cpu/sched \
             common/drivers/soc/oplus/oplus_resctrl \
             common/drivers/soc/oplus/storage; do
-            if [ -e "$check_path" ] && [ ! -d "$check_path" ]; then
+            if { [ -L "$check_path" ] || [ -e "$check_path" ]; } && [ ! -d "$check_path" ]; then
               echo "  移除冲突文件: $check_path"
               rm -f "$check_path"
             fi
