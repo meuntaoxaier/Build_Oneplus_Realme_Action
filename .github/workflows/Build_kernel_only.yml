@@ -555,9 +555,12 @@ jobs:
           ## end boot install
           AKEOF
           sed -i 's/^          //g' AnyKernel3/anykernel.sh
-          
+          cd AnyKernel3
+          zip -r9 ../AK3_${{ env.DEVICES_NAME }}.zip * -x '*.git*'
+          cd ..
+
       - name: 📤 Upload AnyKernel3 (上传 Anykernel3)
         uses: actions/upload-artifact@v4
         with:
          name: AK3_${{ env.DEVICES_NAME }}
-         path: ./AnyKernel3/*
+         path: ./AK3_${{ env.DEVICES_NAME }}.zip
