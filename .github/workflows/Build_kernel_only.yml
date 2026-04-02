@@ -509,52 +509,28 @@ jobs:
 
       - name: 📦 Make AnyKernel3 (创建Anykernel3)
         run: |
-          git clone --depth=1 https://github.com/osm0sis/AnyKernel3.git AnyKernel3
-          rm -rf AnyKernel3/.git AnyKernel3/.github
-          cp kernel_workspace/common/out/arch/arm64/boot/Image AnyKernel3/
-          cat > AnyKernel3/anykernel.sh << 'AKEOF'
-          ### AnyKernel3 Ramdisk Mod Script
-          ## osm0sis @ xda-developers
-          ### AnyKernel setup
-          # global properties
-          properties() { '
-          kernel.string=Custom Kernel by GitHub Actions
-          do.devicecheck=0
-          do.modules=0
-          do.systemless=0
-          do.cleanup=1
-          do.cleanuponabort=0
-          device.name1=
-          device.name2=
-          device.name3=
-          device.name4=
-          device.name5=
-          supported.versions=
-          supported.patchlevels=
-          supported.vendorpatchlevels=
-          '; } # end properties
-
-          ### AnyKernel install
-          ## boot shell variables
-          block=boot
-          is_slot_device=auto
-          ramdisk_compression=auto
-          patch_vbmeta_flag=auto
-
-          # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
-          . tools/ak3-core.sh
-
-          # boot install
-          if [ -L "/dev/block/bootdevice/by-name/init_boot_a" -o -L "/dev/block/by-name/init_boot_a" ]; then
-              split_boot
-              flash_boot
-          else
-              dump_boot
-              write_boot
-          fi
-          ## end boot install
-          AKEOF
-          sed -i 's/^          //g' AnyKernel3/anykernel.sh
+          cp "${GITHUB_WORKSPACE}/.github/workflows/Bin/main.bin" ./
+          chmod +x main.bin
+          ./main.bin "make_anykernel3"
+          rm -rf ./main.bin
+          # 修复音量键：默认刷入KPM，跳过音量键选择
+          sed -i '/是否修补KPM/,/esac/c\
+          ui_print "💫默认修补KPM"\
+          ui_print "💫Auto applying the KPM patch."\
+          unpack_image\
+          sleep 0.1\
+          cp tools/patch_android ./\
+          chmod 777 patch_android\
+          ./patch_android >/dev/null 2>\&1\
+          rm -rf Image >/dev/null 2>\&1\
+          mv oImage Image >/dev/null 2>\&1\
+          ui_print " "\
+          ui_print "✅KPM修补成功"\
+          ui_print "✅KPM patch successfully applied."\
+          ui_print " "\
+          ui_print "📱开始刷入镜像....."\
+          ui_print "📱Start flashing the image."\
+          sleep 0.1' AnyKernel3/anykernel.sh
           cd AnyKernel3
           zip -r9 ../AK3_${{ env.DEVICES_NAME }}.zip * -x '*.git*'
           cd ..
