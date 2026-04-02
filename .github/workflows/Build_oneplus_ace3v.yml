@@ -433,6 +433,16 @@ jobs:
             fi
             rm -f adios_ioscheduler.patch
           fi
+          # Fix ADIOS for kernel 6.1: replace 6.10+ APIs with 6.1 equivalents
+          if [ -f "block/adios.c" ]; then
+            echo "正在修复 ADIOS 调度器内核 6.1 兼容性..."
+            sed -i 's/insert_flags & BLK_MQ_INSERT_AT_HEAD/at_head/g' block/adios.c
+            sed -i 's/blk_insert_t insert_flags/bool at_head/g' block/adios.c
+            sed -i 's/blk_insert_t/bool/g' block/adios.c
+            sed -i 's/insert_flags/at_head/g' block/adios.c
+            sed -i 's/timer_shutdown_sync/del_timer_sync/g' block/adios.c
+            echo "✓ ADIOS 6.1 兼容性修复完成"
+          fi
           if ! grep -q "CONFIG_MQ_IOSCHED_ADIOS" arch/arm64/configs/gki_defconfig; then
             echo "CONFIG_MQ_IOSCHED_ADIOS=y" >> arch/arm64/configs/gki_defconfig
             echo "CONFIG_MQ_IOSCHED_DEFAULT_ADIOS=y" >> arch/arm64/configs/gki_defconfig
