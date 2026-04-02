@@ -178,7 +178,7 @@ jobs:
           # Must define all 8 handler functions referenced by the vendor-modified
           # mutex.c, rwsem.c, rtmutex.c, rtmutex_api.c, percpu-rwsem.c/h sources.
           {
-            echo '// SPDX-License-Identifier: GPL-2.0'
+            echo '/* SPDX-License-Identifier: GPL-2.0 */'
             echo '/* Stub: proprietary oplus locking module not present in open-source release */'
             echo '#include <linux/types.h>'
             echo '#include <linux/sched.h>'
