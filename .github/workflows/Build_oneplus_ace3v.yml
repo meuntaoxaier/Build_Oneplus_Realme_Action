@@ -140,10 +140,13 @@ jobs:
           done
           mkdir -p common/kernel/oplus_cpu/sched
           touch common/kernel/oplus_cpu/sched/Kconfig
+          touch common/kernel/oplus_cpu/sched/Makefile
           mkdir -p common/drivers/soc/oplus/oplus_resctrl
           touch common/drivers/soc/oplus/oplus_resctrl/Kconfig
+          touch common/drivers/soc/oplus/oplus_resctrl/Makefile
           mkdir -p common/drivers/soc/oplus/storage
           touch common/drivers/soc/oplus/storage/Kconfig
+          touch common/drivers/soc/oplus/storage/Makefile
           echo "正在创建缺失的 oplus locking 桩文件..."
           # kernel/locking/ contains dangling vendor symlinks that must be
           # replaced with stubs so the build can find them.
