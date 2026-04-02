@@ -150,21 +150,20 @@ jobs:
           echo "正在创建缺失的 oplus locking 桩文件..."
           # kernel/locking/ contains dangling vendor symlinks that must be
           # replaced with stubs so the build can find them.
+          # Remove dangling symlinks first
           for stub in \
             common/kernel/locking/oplus_locking.c \
-            common/kernel/locking/sa_common_struct.h; do
+            common/kernel/locking/sa_common_struct.h \
+            common/kernel/locking/locking_main.h; do
             if [ -L "$stub" ] || [ -e "$stub" ]; then
               rm -f "$stub"
             fi
-            touch "$stub"
-            echo "  已创建桩文件: $stub"
           done
-          # locking_main.h needs a stub declaration for locking_record_switch_in_cs
+          # sa_common_struct.h - empty stub header
+          touch common/kernel/locking/sa_common_struct.h
+          echo "  已创建桩文件: sa_common_struct.h"
+          # locking_main.h - needs stub declaration for locking_record_switch_in_cs
           # which is called in kernel/sched/core.c but not defined in the open-source release.
-          stub=common/kernel/locking/locking_main.h
-          if [ -L "$stub" ] || [ -e "$stub" ]; then
-            rm -f "$stub"
-          fi
           {
             echo '/* SPDX-License-Identifier: GPL-2.0 */'
             echo '/* Stub: proprietary oplus locking header not present in open-source release */'
@@ -173,8 +172,31 @@ jobs:
             echo '#include <linux/sched.h>'
             echo 'static inline void locking_record_switch_in_cs(struct task_struct *p) {}'
             echo '#endif /* _LOCKING_MAIN_H */'
-          } > "$stub"
-          echo "  已创建桩文件: $stub"
+          } > common/kernel/locking/locking_main.h
+          echo "  已创建桩文件: locking_main.h"
+          # oplus_locking.c - compiled as obj-y in kernel/locking/Makefile.
+          # Must define all 8 handler functions referenced by the vendor-modified
+          # mutex.c, rwsem.c, rtmutex.c, rtmutex_api.c, percpu-rwsem.c/h sources.
+          {
+            echo '/* SPDX-License-Identifier: GPL-2.0 */'
+            echo '/* Stub: proprietary oplus locking module not present in open-source release */'
+            echo '#include <linux/types.h>'
+            echo '#include <linux/sched.h>'
+            echo '#include <linux/mutex.h>'
+            echo '#include <linux/rwsem.h>'
+            echo '#include <linux/rtmutex.h>'
+            echo '#include <linux/percpu-rwsem.h>'
+            echo ''
+            echo 'void mutex_lock_handler(u64 lock, struct task_struct *tsk, unsigned long jiffies) {}'
+            echo 'void mutex_wait_handler(struct mutex *lock) {}'
+            echo 'void rwsem_lock_handler(u64 sem, struct task_struct *tsk, unsigned long jiffies) {}'
+            echo 'void rwsem_read_wait_handler(struct rw_semaphore *sem) {}'
+            echo 'void rtmutex_lock_handler(u64 lock, struct task_struct *tsk, unsigned long jiffies) {}'
+            echo 'void rtmutex_wait_handler(struct rt_mutex_base *lock) {}'
+            echo 'void android_vh_pcpu_rwsem_handler(u64 sem, struct task_struct *tsk, unsigned long jiffies) {}'
+            echo 'void pcp_wait_handler(struct percpu_rw_semaphore *sem, bool is_reader, int phase) {}'
+          } > common/kernel/locking/oplus_locking.c
+          echo "  已创建桩文件: oplus_locking.c (含8个handler函数定义)"
 
       - name: 🛠 Set ccache DIR(配置ccache目录)
         run: |
