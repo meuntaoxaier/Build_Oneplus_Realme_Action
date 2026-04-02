@@ -162,15 +162,15 @@ jobs:
           if [ -L "$stub" ] || [ -e "$stub" ]; then
             rm -f "$stub"
           fi
-          cat > "$stub" << 'EOF'
-/* SPDX-License-Identifier: GPL-2.0 */
-/* Stub: proprietary oplus locking header not present in open-source release */
-#ifndef _LOCKING_MAIN_H
-#define _LOCKING_MAIN_H
-#include <linux/sched.h>
-static inline void locking_record_switch_in_cs(struct task_struct *p) {}
-#endif /* _LOCKING_MAIN_H */
-EOF
+          {
+            echo '/* SPDX-License-Identifier: GPL-2.0 */'
+            echo '/* Stub: proprietary oplus locking header not present in open-source release */'
+            echo '#ifndef _LOCKING_MAIN_H'
+            echo '#define _LOCKING_MAIN_H'
+            echo '#include <linux/sched.h>'
+            echo 'static inline void locking_record_switch_in_cs(struct task_struct *p) {}'
+            echo '#endif /* _LOCKING_MAIN_H */'
+          } > "$stub"
           echo "  已创建桩文件: $stub"
 
       - name: 🛠 Set ccache DIR(配置ccache目录)
